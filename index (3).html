@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>MxPlk Gridiron Picks</title>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/htm@3/dist/htm.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f1f5f9;color:#1e293b;}
+nav{background:#fff;border-bottom:1px solid #e2e8f0;padding:12px 16px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;position:sticky;top:0;z-index:100;}
+.logo{font-size:18px;font-weight:800;color:#1e293b;cursor:pointer;}
+.logo span{color:#1d4ed8;}
+.logo small{display:block;font-size:11px;color:#94a3b8;font-weight:400;}
+.navbtns{display:flex;gap:4px;flex-wrap:wrap;}
+.navbtn{padding:6px 10px;border:none;background:transparent;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;color:#64748b;font-family:inherit;}
+.navbtn.active{background:#1d4ed8;color:#fff;}
+main{max-width:1100px;margin:0 auto;padding:20px 16px 60px;}
+h1{font-size:clamp(24px,5vw,38px);font-weight:800;margin-bottom:8px;}
+h2{font-size:22px;font-weight:800;margin-bottom:4px;}
+h3{font-size:16px;font-weight:800;margin-bottom:8px;}
+p{color:#64748b;font-size:14px;line-height:1.6;}
+.card{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;margin:16px 0;}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:16px 0;}
+.grid4{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;margin:16px 0;}
+.stat-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:16px;text-align:center;}
+.stat-val{font-size:26px;font-weight:800;color:#1d4ed8;}
+.stat-lbl{font-size:11px;color:#94a3b8;margin-top:4px;}
+.stat-sub{font-size:10px;color:#dc2626;margin-top:2px;}
+.game-card{background:#fff;border:2px solid #e2e8f0;border-radius:12px;padding:14px;transition:border-color .15s;}
+.game-card.picked{border-color:#bfdbfe;}
+.game-card.closed{opacity:.5;pointer-events:none;}
+.game-time{font-size:11px;color:#94a3b8;margin-bottom:10px;}
+.spread{color:#1d4ed8;font-weight:700;}
+.matchup{display:flex;align-items:stretch;gap:8px;}
+.team-btn{flex:1;display:flex;align-items:center;gap:8px;padding:10px;border:2px solid #e2e8f0;border-radius:8px;cursor:pointer;background:#fff;font-family:inherit;text-align:left;position:relative;transition:all .15s;}
+.team-btn:disabled{cursor:not-allowed;}
+.team-logo{width:38px;height:38px;object-fit:contain;flex-shrink:0;}
+.team-logo-fallback{width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;flex-shrink:0;}
+.team-abbr{font-size:15px;font-weight:800;}
+.team-name{font-size:10px;color:#94a3b8;line-height:1.3;}
+.team-role{font-size:9px;color:#cbd5e1;}
+.check{position:absolute;top:4px;right:6px;color:#16a34a;font-weight:900;font-size:13px;}
+.vs{display:flex;align-items:center;padding:0 4px;font-size:10px;color:#cbd5e1;font-weight:700;}
+.progress-wrap{display:flex;align-items:center;gap:10px;margin:12px 0;}
+.progress-bar{flex:1;height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;}
+.progress-fill{height:100%;background:#1d4ed8;border-radius:3px;transition:width .3s;}
+.progress-lbl{font-size:12px;color:#64748b;white-space:nowrap;}
+input,select{padding:10px 14px;border:1px solid #cbd5e1;border-radius:8px;font-family:inherit;font-size:14px;color:#1e293b;outline:none;background:#fff;}
+.input-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;}
+.input-row input{flex:1;min-width:180px;}
+.btn{padding:12px 24px;border:none;border-radius:8px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit;}
+.btn-primary{background:#1d4ed8;color:#fff;}
+.btn-red{background:#b91c1c;color:#fff;}
+.btn-outline{background:#fff;border:1px solid #cbd5e1;color:#475569;}
+.btn:disabled{opacity:.45;cursor:not-allowed;}
+.submit-row{margin-top:20px;display:flex;flex-direction:column;align-items:center;gap:10px;}
+.submit-status{font-size:13px;color:#64748b;}
+.banner{border-radius:10px;padding:12px 16px;margin-bottom:14px;font-size:13px;display:flex;flex-direction:column;gap:4px;}
+.banner-green{background:#f0fdf4;border:1px solid #bbf7d0;color:#166534;}
+.banner-red{background:#fef2f2;border:1px solid #fecaca;color:#991b1b;}
+.banner-yellow{background:#fffbeb;border:1px solid #fde68a;color:#92400e;}
+.badge-paid{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:#dcfce7;color:#15803d;}
+.badge-pending{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:#fef3c7;color:#b45309;}
+.badge-voided{padding:2px 8px;border-radius:4px;font-size:11px;font-weight:700;background:#fee2e2;color:#b91c1c;}
+.leader-table{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:16px;}
+.leader-head{display:flex;padding:10px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:11px;color:#94a3b8;font-weight:700;}
+.leader-row{display:flex;padding:12px 16px;font-size:13px;border-bottom:1px solid #f1f5f9;align-items:center;}
+.leader-row.alt{background:#f8fafc;}
+.leader-row.first{background:#fefce8;}
+.leader-row.voided{opacity:.5;}
+.week-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;}
+.week-tab{padding:6px 12px;border:1px solid #cbd5e1;border-radius:6px;background:#fff;color:#475569;cursor:pointer;font-weight:700;font-size:12px;font-family:inherit;}
+.week-tab.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8;}
+.countdown{display:inline-block;font-size:12px;font-weight:700;border:1px solid;border-radius:6px;padding:3px 10px;}
+.modal-overlay{position:fixed;inset:0;background:rgba(15,23,42,.6);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;}
+.modal{background:#fff;border-radius:14px;padding:28px 24px;max-width:420px;width:100%;box-shadow:0 20px 50px rgba(0,0,0,.2);}
+.modal h2{font-size:20px;font-weight:800;text-align:center;margin-bottom:6px;}
+.modal p{text-align:center;color:#475569;font-size:13px;margin-bottom:4px;}
+.pay-btn{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:10px;cursor:pointer;border:2px solid;margin-bottom:10px;background:#fff;font-family:inherit;text-align:left;width:100%;}
+.pay-btn-ca{border-color:#16a34a;background:#f0fdf4;}
+.pay-btn-z{border-color:#7c3aed;background:#f5f3ff;}
+.pay-icon{font-size:24px;}
+.pay-label{font-size:15px;font-weight:800;}
+.pay-handle{font-size:12px;color:#475569;}
+.void-warning{background:#fef2f2;border:1px solid #fecaca;border-radius:8px;padding:10px 14px;font-size:12px;color:#b91c1c;margin:10px 0;}
+.modal-note{font-size:11px;color:#64748b;text-align:center;margin:10px 0;}
+.info-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;}
+.info-title{font-size:13px;font-weight:800;margin-bottom:6px;}
+.policy-box{background:#fef2f2;border:1px solid #fecaca;border-radius:10px;padding:12px 16px;display:flex;gap:10px;align-items:flex-start;font-size:13px;color:#991b1b;margin:14px 0;}
+.admin-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap;}
+.admin-tab{padding:8px 16px;border:1px solid #e2e8f0;border-radius:8px;background:#f8fafc;color:#64748b;cursor:pointer;font-weight:700;font-size:13px;font-family:inherit;}
+.admin-tab.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8;}
+.admin-table{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.admin-head{display:flex;padding:10px 16px;background:#f8fafc;border-bottom:1px solid #e2e8f0;font-size:11px;color:#94a3b8;font-weight:700;}
+.admin-row{display:flex;padding:12px 16px;font-size:13px;border-bottom:1px solid #f1f5f9;align-items:center;gap:6px;}
+.admin-row.paid-row{background:#f0fdf4;}
+.admin-row.voided-row{background:#fef2f2;opacity:.7;}
+.toggle-btn{padding:5px 12px;border:1px solid;border-radius:6px;cursor:pointer;font-weight:800;font-size:11px;font-family:inherit;white-space:nowrap;}
+.sum-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;}
+.sum-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;text-align:center;}
+.sum-val{font-size:20px;font-weight:800;}
+.sum-lbl{font-size:10px;color:#94a3b8;margin-top:2px;}
+.void-all-btn{padding:10px 18px;background:#fef2f2;border:2px solid #dc2626;border-radius:8px;color:#dc2626;cursor:pointer;font-weight:800;font-size:12px;font-family:inherit;}
+.reminder-btn{display:flex;align-items:center;gap:10px;padding:12px 16px;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;color:#92400e;text-decoration:none;font-weight:700;font-size:13px;cursor:pointer;margin-bottom:8px;}
+.round-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;}
+.round-tab{flex:1;min-width:110px;padding:10px 8px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;font-family:inherit;text-align:center;display:flex;flex-direction:column;gap:2px;}
+.round-tab.active{background:#fef2f2;border-color:#fca5a5;}
+.round-tab.done{border-color:#86efac;}
+.round-tab-label{font-size:12px;font-weight:800;color:#1e293b;}
+.round-tab-pts{font-size:16px;font-weight:800;color:#1d4ed8;}
+.round-tab-prog{font-size:10px;color:#16a34a;}
+.tb-box{background:#fffbeb;border:2px solid #fcd34d;border-radius:12px;padding:16px;margin-bottom:16px;}
+.tb-title{font-size:14px;font-weight:800;color:#92400e;margin-bottom:4px;}
+.tb-desc{font-size:12px;color:#78716c;line-height:1.7;margin-bottom:10px;}
+.tb-inputs{display:flex;gap:8px;flex-wrap:wrap;}
+.tb-confirm{font-size:12px;color:#78350f;margin-top:8px;}
+.winner-banner{background:#fefce8;border:1px solid #fde68a;border-radius:12px;padding:14px 18px;margin-bottom:14px;display:flex;align-items:center;gap:12px;}
+.winner-name{font-size:14px;font-weight:800;color:#854d0e;}
+.winner-desc{font-size:12px;color:#a16207;margin-top:2px;line-height:1.5;}
+.king-banner{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin-bottom:14px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.king-title{font-size:13px;font-weight:800;color:#166534;margin-bottom:2px;}
+.king-pot{background:#fff;border:1px solid #bbf7d0;border-radius:8px;padding:10px 16px;text-align:center;min-width:100px;}
+.king-pot-val{font-size:22px;font-weight:800;color:#16a34a;}
+.payment-box{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:16px;}
+.pay-methods{display:flex;gap:12px;flex-wrap:wrap;margin:12px 0;}
+.pay-method{display:flex;align-items:center;gap:10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;flex:1;min-width:160px;}
+.pay-method-label{font-size:14px;font-weight:800;}
+.pay-method-handle{font-size:13px;color:#1d4ed8;margin-top:1px;}
+.rule-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;}
+.rule-title{font-size:13px;font-weight:800;margin-bottom:6px;}
+.rule-content{font-size:12px;color:#64748b;line-height:1.7;}
+.locked-box{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:40px 20px;text-align:center;}
+.pop-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:10px;}
+.pop-card{background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px 12px;}
+.pop-matchup{font-size:11px;color:#64748b;font-weight:700;margin-bottom:6px;}
+.pop-bar-wrap{height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin-bottom:4px;}
+.pop-labels{display:flex;justify-content:space-between;font-size:11px;font-weight:800;}
+.all-picks-scroll{overflow-x:auto;}
+table{border-collapse:collapse;width:100%;font-size:12px;min-width:500px;}
+th{padding:8px 6px;font-size:11px;color:#64748b;border-bottom:2px solid #e2e8f0;text-align:center;white-space:nowrap;}
+td{padding:7px 6px;border-bottom:1px solid #f1f5f9;text-align:center;}
+td:first-child{font-weight:700;color:#1e293b;text-align:left;padding-left:10px;}
+tr.alt-row{background:#f8fafc;}
+tr.voided-row{opacity:.4;}
+.pick-chip{display:inline-block;padding:2px 7px;border-radius:5px;border:1px solid;font-weight:800;font-size:11px;}
+.voided-tag{margin-left:5px;font-size:9px;color:#dc2626;border:1px solid #fecaca;border-radius:3px;padding:1px 4px;}
+.paylog-form{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-bottom:14px;}
+.bal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:16px;}
+.bal-card{background:#fff;border:1px solid;border-radius:10px;padding:12px;cursor:pointer;}
+.bal-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+.bal-name{font-size:14px;font-weight:800;}
+.bal-status{font-size:11px;font-weight:800;padding:3px 8px;border-radius:5px;}
+.bal-row{display:flex;gap:8px;}
+.bal-item{flex:1;text-align:center;background:#f8fafc;border-radius:6px;padding:5px 3px;}
+.bal-val{font-size:14px;font-weight:800;color:#1d4ed8;}
+.bal-lbl{font-size:9px;color:#94a3b8;margin-top:1px;}
+.hist-row{display:flex;gap:8px;align-items:center;padding:5px 0;border-top:1px solid #f1f5f9;flex-wrap:wrap;font-size:11px;}
+.payout-card{display:flex;justify-content:space-between;align-items:center;background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;margin-bottom:8px;flex-wrap:wrap;gap:8px;}
+.payout-name{font-size:17px;font-weight:800;color:#92400e;}
+.payout-detail{font-size:11px;color:#a16207;margin-top:2px;}
+.payout-amt{font-size:24px;font-weight:800;color:#b45309;}
+.payout-lbl{font-size:11px;color:#a16207;}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:12px;margin-bottom:16px;}
+.stats-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;cursor:pointer;}
+.stats-card.active{border:2px solid #1d4ed8;background:#eff6ff;}
+.stats-top{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;}
+.stats-name{font-size:14px;font-weight:800;}
+.badge-row{display:flex;gap:4px;}
+.stats-row2{display:flex;gap:8px;}
+.s-item{flex:1;text-align:center;background:#f8fafc;border-radius:6px;padding:5px 3px;}
+.s-val{font-size:14px;font-weight:800;color:#1d4ed8;}
+.s-lbl{font-size:9px;color:#94a3b8;margin-top:1px;}
+.week-chart{display:flex;gap:3px;align-items:flex-end;height:55px;margin:10px 0 4px;}
+.wbar{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;gap:1px;}
+.wbar-fill{width:100%;border-radius:2px;min-height:3px;}
+.wbar-lbl{font-size:7px;color:#94a3b8;}
+.wbar-val{font-size:8px;color:#475569;font-weight:700;}
+.badge-legend{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;}
+.bl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;}
+.bl-item{display:flex;align-items:center;gap:8px;}
+.reg-form{background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:22px;max-width:480px;}
+.reg-success{text-align:center;background:#fff;border:1px solid #e2e8f0;border-radius:12px;padding:36px 20px;}
+.mnf-box{background:#fffbeb;border:2px solid #fcd34d;border-radius:10px;padding:14px;margin-bottom:14px;}
+.footer{border-top:1px solid #e2e8f0;padding:14px;text-align:center;font-size:11px;color:#94a3b8;display:flex;justify-content:center;gap:20px;flex-wrap:wrap;}
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:10px;margin-bottom:16px;}
+.result-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:12px;}
+.result-matchup{font-size:11px;color:#64748b;margin-bottom:8px;font-weight:600;}
+.result-inputs{display:flex;align-items:center;gap:8px;}
+.result-score{flex:1;text-align:center;}
+.result-score-label{font-size:12px;font-weight:800;margin-bottom:4px;}
+.result-input{width:100%;padding:7px;border:1px solid #cbd5e1;border-radius:6px;text-align:center;font-size:17px;font-weight:800;font-family:inherit;outline:none;}
+.players-table{background:#fff;border:1px solid #e2e8f0;border-radius:12px;overflow:hidden;margin-bottom:14px;}
+.announce-box{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-top:14px;}
+.login-box{max-width:360px;margin:40px auto;background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:32px 24px;text-align:center;}
+.hero{text-align:center;padding:28px 10px 20px;}
+.hero-actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+.payout-overview{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin:14px 0 20px;}
+.pov-card{background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px;text-align:center;}
+.pov-icon{font-size:22px;margin-bottom:4px;}
+.pov-label{font-size:10px;color:#94a3b8;margin-bottom:4px;}
+.pov-val{font-size:24px;font-weight:800;color:#1d4ed8;}
+.pov-sub{font-size:10px;color:#94a3b8;margin-top:3px;line-height:1.4;}
+.toast{position:fixed;top:14px;right:14px;z-index:1000;padding:11px 18px;border-radius:8px;font-weight:600;font-size:13px;color:#fff;box-shadow:0 4px 16px rgba(0,0,0,.15);}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script>
+const { createElement: h, useState, useEffect, useRef } = React;
+const ENTRY_FEE = 12, BASE_WEEKLY_FEE = 10, SEASON_KING_FEE = 2, PLAYOFF_FEE = 20;
+const ADMIN_PIN = "5151", CURRENT_WEEK = 1;
+const PAYMENT_INFO = { cashapp: "$mkmitchell51", zelle: "561-254-8818" };
+
+const NFL_WEEKS = {
+  1:[
+    {id:1,away:"Kansas City Chiefs",home:"Baltimore Ravens",awayAbbr:"KC",homeAbbr:"BAL",time:"Thu 8:20 PM",spread:"KC -3"},
+    {id:2,away:"Dallas Cowboys",home:"Philadelphia Eagles",awayAbbr:"DAL",homeAbbr:"PHI",time:"Sun 1:00 PM",spread:"PHI -4"},
+    {id:3,away:"San Francisco 49ers",home:"Los Angeles Rams",awayAbbr:"SF",homeAbbr:"LAR",time:"Sun 1:00 PM",spread:"SF -2"},
+    {id:4,away:"Buffalo Bills",home:"Miami Dolphins",awayAbbr:"BUF",homeAbbr:"MIA",time:"Sun 1:00 PM",spread:"BUF -5"},
+    {id:5,away:"Green Bay Packers",home:"Chicago Bears",awayAbbr:"GB",homeAbbr:"CHI",time:"Sun 1:00 PM",spread:"GB -6"},
+    {id:6,away:"Cincinnati Bengals",home:"Cleveland Browns",awayAbbr:"CIN",homeAbbr:"CLE",time:"Sun 1:00 PM",spread:"CIN -3"},
+    {id:7,away:"New York Giants",home:"Washington Commanders",awayAbbr:"NYG",homeAbbr:"WAS",time:"Sun 4:25 PM",spread:"WAS -2"},
+    {id:8,away:"Seattle Seahawks",home:"Arizona Cardinals",awayAbbr:"SEA",homeAbbr:"ARI",time:"Sun 4:25 PM",spread:"SEA -7"},
+    {id:9,away:"New England Patriots",home:"New York Jets",awayAbbr:"NE",homeAbbr:"NYJ",time:"Sun 4:25 PM",spread:"NYJ -4"},
+    {id:10,away:"Pittsburgh Steelers",home:"Jacksonville Jaguars",awayAbbr:"PIT",homeAbbr:"JAC",time:"Sun 4:25 PM",spread:"PIT -3"},
+    {id:11,away:"Tennessee Titans",home:"Indianapolis Colts",awayAbbr:"TEN",homeAbbr:"IND",time:"Sun 4:25 PM",spread:"IND -1"},
+    {id:12,away:"Denver Broncos",home:"Las Vegas Raiders",awayAbbr:"DEN",homeAbbr:"LV",time:"Sun 4:25 PM",spread:"DEN -4"},
+    {id:13,away:"Atlanta Falcons",home:"Tampa Bay Buccaneers",awayAbbr:"ATL",homeAbbr:"TB",time:"Sun 8:20 PM",spread:"TB -2"},
+    {id:14,away:"Detroit Lions",home:"Minnesota Vikings",awayAbbr:"DET",homeAbbr:"MIN",time:"Mon 8:15 PM",spread:"DET -3"},
+  ],
+  2:[
+    {id:1,away:"Baltimore Ravens",home:"Kansas City Chiefs",awayAbbr:"BAL",homeAbbr:"KC",time:"Thu 8:20 PM",spread:"KC -1"},
+    {id:2,away:"Philadelphia Eagles",home:"Dallas Cowboys",awayAbbr:"PHI",homeAbbr:"DAL",time:"Sun 1:00 PM",spread:"PHI -3"},
+    {id:3,away:"Los Angeles Rams",home:"San Francisco 49ers",awayAbbr:"LAR",homeAbbr:"SF",time:"Sun 1:00 PM",spread:"SF -3"},
+    {id:4,away:"Miami Dolphins",home:"Buffalo Bills",awayAbbr:"MIA",homeAbbr:"BUF",time:"Sun 1:00 PM",spread:"BUF -4"},
+    {id:5,away:"Chicago Bears",home:"Green Bay Packers",awayAbbr:"CHI",homeAbbr:"GB",time:"Sun 1:00 PM",spread:"GB -5"},
+    {id:6,away:"Cleveland Browns",home:"Cincinnati Bengals",awayAbbr:"CLE",homeAbbr:"CIN",time:"Sun 1:00 PM",spread:"CIN -4"},
+    {id:7,away:"Houston Texans",home:"New Orleans Saints",awayAbbr:"HOU",homeAbbr:"NO",time:"Sun 4:25 PM",spread:"HOU -2"},
+    {id:8,away:"Los Angeles Chargers",home:"Seattle Seahawks",awayAbbr:"LAC",homeAbbr:"SEA",time:"Sun 4:25 PM",spread:"SEA -1"},
+    {id:9,away:"Carolina Panthers",home:"Atlanta Falcons",awayAbbr:"CAR",homeAbbr:"ATL",time:"Sun 4:25 PM",spread:"ATL -5"},
+    {id:10,away:"Minnesota Vikings",home:"Detroit Lions",awayAbbr:"MIN",homeAbbr:"DET",time:"Sun 8:20 PM",spread:"DET -2"},
+    {id:11,away:"Jacksonville Jaguars",home:"Pittsburgh Steelers",awayAbbr:"JAC",homeAbbr:"PIT",time:"Mon 8:15 PM",spread:"PIT -4"},
+  ]
+};
+
+const MNF_GAMES = {
+  1:{away:"Detroit Lions",home:"Minnesota Vikings",awayAbbr:"DET",homeAbbr:"MIN"},
+  2:{away:"Minnesota Vikings",home:"Detroit Lions",awayAbbr:"MIN",homeAbbr:"DET"}
+};
+
+const WEEK_DEADLINES = {
+  1:"2026-09-10T20:20:00",
+  2:"2026-09-17T20:20:00"
+};
+
+const TEAM_COLORS = {
+  KC:"#E31837",BAL:"#241773",DAL:"#003594",PHI:"#004C54",SF:"#AA0000",LAR:"#003594",
+  BUF:"#00338D",MIA:"#008E97",GB:"#203731",CHI:"#0B162A",CIN:"#FB4F14",CLE:"#FF3C00",
+  NYG:"#0B2265",WAS:"#773141",SEA:"#002244",ARI:"#97233F",NE:"#002244",NYJ:"#125740",
+  PIT:"#FFB612",JAC:"#006778",TEN:"#4B92DB",IND:"#002C5F",DEN:"#FB4F14",LV:"#A5ACAF",
+  ATL:"#A71930",TB:"#D50A0A",DET:"#0076B6",MIN:"#4F2683",HOU:"#03202F",NO:"#D3BC8D",
+  LAC:"#0080C6",CAR:"#0085CA",AFC:"#003594",NFC:"#AA0000"
+};
+
+const LOGOS = {
+  KC:"kc",BAL:"bal",DAL:"dal",PHI:"phi",SF:"sf",LAR:"lar",BUF:"buf",MIA:"mia",
+  GB:"gb",CHI:"chi",CIN:"cin",CLE:"cle",NYG:"nyg",WAS:"wsh",SEA:"sea",ARI:"ari",
+  NE:"ne",NYJ:"nyj",PIT:"pit",JAC:"jax",TEN:"ten",IND:"ind",DEN:"den",LV:"lv",
+  ATL:"atl",TB:"tb",DET:"det",MIN:"min",HOU:"hou",NO:"no",LAC:"lac",CAR:"car",
+  AFC:"afc",NFC:"nfc"
+};
+
+const PLAYOFF_ROUNDS = [
+  {id:"wildcard",label:"Wild Card",points:1,date:"Jan 10-12, 2027"},
+  {id:"divisional",label:"Divisional",points:2,date:"Jan 17-18, 2027"},
+  {id:"conference",label:"Conf. Champ",points:3,date:"Jan 25, 2027"},
+  {id:"superbowl",label:"Super Bowl",points:5,date:"Feb 8, 2027"},
+];
+
+const PLAYOFF_BRACKET = {
+  wildcard:[
+    {id:"wc1",away:"TBD (AFC 3)",home:"TBD (AFC 6)",awayAbbr:"AFC3",homeAbbr:"AFC6",conf:"AFC"},
+    {id:"wc2",away:"TBD (AFC 4)",home:"TBD (AFC 5)",awayAbbr:"AFC4",homeAbbr:"AFC5",conf:"AFC"},
+    {id:"wc3",away:"TBD (AFC 2)",home:"TBD (AFC 7)",awayAbbr:"AFC2",homeAbbr:"AFC7",conf:"AFC"},
+    {id:"wc4",away:"TBD (NFC 3)",home:"TBD (NFC 6)",awayAbbr:"NFC3",homeAbbr:"NFC6",conf:"NFC"},
+    {id:"wc5",away:"TBD (NFC 4)",home:"TBD (NFC 5)",awayAbbr:"NFC4",homeAbbr:"NFC5",conf:"NFC"},
+    {id:"wc6",away:"TBD (NFC 2)",home:"TBD (NFC 7)",awayAbbr:"NFC2",homeAbbr:"NFC7",conf:"NFC"},
+  ],
+  divisional:[
+    {id:"div1",away:"WC Winner 1",home:"TBD (AFC 1)",awayAbbr:"WC1",homeAbbr:"AFC1",conf:"AFC"},
+    {id:"div2",away:"WC Winner 2",home:"WC Winner 3",awayAbbr:"WC2",homeAbbr:"WC3",conf:"AFC"},
+    {id:"div3",away:"WC Winner 4",home:"TBD (NFC 1)",awayAbbr:"WC4",homeAbbr:"NFC1",conf:"NFC"},
+    {id:"div4",away:"WC Winner 5",home:"WC Winner 6",awayAbbr:"WC5",homeAbbr:"WC6",conf:"NFC"},
+  ],
+  conference:[
+    {id:"cc1",away:"Div Winner 1",home:"Div Winner 2",awayAbbr:"DIV1",homeAbbr:"DIV2",conf:"AFC",label:"AFC Championship"},
+    {id:"cc2",away:"Div Winner 3",home:"Div Winner 4",awayAbbr:"DIV3",homeAbbr:"DIV4",conf:"NFC",label:"NFC Championship"},
+  ],
+  superbowl:[
+    {id:"sb1",away:"AFC Champion",home:"NFC Champion",awayAbbr:"AFC",homeAbbr:"NFC",conf:"SB",label:"Super Bowl LXI · New Orleans"},
+  ]
+};
+
+const STANDINGS = [
+  {name:"Mike T.", regPts:9,playoffPts:0,paid:true, voided:false},
+  {name:"Sarah K.",regPts:8,playoffPts:0,paid:true, voided:false},
+  {name:"Jason R.",regPts:8,playoffPts:0,paid:false,voided:false},
+  {name:"Linda M.",regPts:7,playoffPts:0,paid:false,voided:true},
+  {name:"Dave P.", regPts:7,playoffPts:0,paid:true, voided:false},
+  {name:"Tanya B.",regPts:6,playoffPts:0,paid:false,voided:true},
+];
+
+const ALL_PICKS = {
+  1:[
+    {name:"Mike T.", paid:true, voided:false,picks:{1:"Kansas City Chiefs",2:"Philadelphia Eagles",3:"San Francisco 49ers",4:"Buffalo Bills",5:"Green Bay Packers",6:"Cincinnati Bengals",7:"Washington Commanders",8:"Seattle Seahawks",9:"New York Jets",10:"Pittsburgh Steelers",11:"Indianapolis Colts",12:"Denver Broncos",13:"Tampa Bay Buccaneers",14:"Detroit Lions"}},
+    {name:"Sarah K.",paid:true, voided:false,picks:{1:"Baltimore Ravens",2:"Philadelphia Eagles",3:"Los Angeles Rams",4:"Buffalo Bills",5:"Green Bay Packers",6:"Cleveland Browns",7:"Washington Commanders",8:"Seattle Seahawks",9:"New York Jets",10:"Pittsburgh Steelers",11:"Indianapolis Colts",12:"Las Vegas Raiders",13:"Tampa Bay Buccaneers",14:"Minnesota Vikings"}},
+    {name:"Dave P.", paid:true, voided:false,picks:{1:"Kansas City Chiefs",2:"Philadelphia Eagles",3:"San Francisco 49ers",4:"Buffalo Bills",5:"Green Bay Packers",6:"Cincinnati Bengals",7:"Washington Commanders",8:"Seattle Seahawks",9:"New England Patriots",10:"Pittsburgh Steelers",11:"Indianapolis Colts",12:"Denver Broncos",13:"Tampa Bay Buccaneers",14:"Detroit Lions"}},
+    {name:"Jason R.",paid:false,voided:false,picks:{1:"Kansas City Chiefs",2:"Dallas Cowboys",3:"San Francisco 49ers",4:"Miami Dolphins",5:"Chicago Bears",6:"Cincinnati Bengals",7:"New York Giants",8:"Arizona Cardinals",9:"New England Patriots",10:"Jacksonville Jaguars",11:"Tennessee Titans",12:"Denver Broncos",13:"Atlanta Falcons",14:"Detroit Lions"}},
+    {name:"Linda M.",paid:false,voided:true, picks:{1:"Baltimore Ravens",2:"Dallas Cowboys",3:"Los Angeles Rams",4:"Miami Dolphins",5:"Chicago Bears",6:"Cleveland Browns",7:"New York Giants",8:"Arizona Cardinals",9:"New England Patriots",10:"Jacksonville Jaguars",11:"Tennessee Titans",12:"Las Vegas Raiders",13:"Atlanta Falcons",14:"Minnesota Vikings"}},
+    {name:"Tanya B.",paid:false,voided:true, picks:{1:"Kansas City Chiefs",2:"Dallas Cowboys",3:"Los Angeles Rams",4:"Miami Dolphins",5:"Chicago Bears",6:"Cleveland Browns",7:"New York Giants",8:"Seattle Seahawks",9:"New York Jets",10:"Jacksonville Jaguars",11:"Indianapolis Colts",12:"Las Vegas Raiders",13:"Atlanta Falcons",14:"Minnesota Vikings"}},
+  ]
+};
+
+const INIT_PLAYERS = [
+  {id:"p1",name:"Mike T.", email:"mike@email.com",phone:"555-111-2222",joined:"Week 1"},
+  {id:"p2",name:"Sarah K.",email:"sarah@email.com",phone:"555-333-4444",joined:"Week 1"},
+  {id:"p3",name:"Dave P.", email:"dave@email.com",phone:"555-555-6666",joined:"Week 1"},
+];
+
+const INIT_PAY_LOG = [
+  {id:"pay1",player:"Mike T.", week:1,amount:12,method:"cashapp",date:"2026-09-08",note:""},
+  {id:"pay2",player:"Sarah K.",week:1,amount:12,method:"zelle",  date:"2026-09-08",note:""},
+  {id:"pay3",player:"Dave P.", week:1,amount:12,method:"cashapp",date:"2026-09-09",note:""},
+];
+
+const SEASON_STATS = [
+  {name:"Mike T.", weeks:[9,8,11,7,10,9,8,12,9,10,8,9,7,11,10,9,8,10],paid:true},
+  {name:"Sarah K.",weeks:[8,9,10,8,9,7,11,8,10,9,9,8,10,9,8,10,9,8], paid:true},
+  {name:"Jason R.",weeks:[8,7,9,10,8,11,7,9,8,7,10,9,8,7,9,8,10,7],  paid:false},
+  {name:"Dave P.", weeks:[7,8,8,9,7,8,10,7,9,8,7,9,8,10,7,9,8,9],    paid:true},
+];
+
+const tc = a => TEAM_COLORS[a] || "#94a3b8";
+const logo = abbr => LOGOS[abbr] ? `https://a.espncdn.com/i/teamlogos/nfl/500/${LOGOS[abbr]}.png` : null;
+
+const fmt = ms => {
+  if(ms<=0)return null;
+  const h=Math.floor(ms/3600000),m=Math.floor((ms%3600000)/60000),s=Math.floor((ms%60000)/1000);
+  if(h>=48)return Math.floor(h/24)+"d "+h%24+"h";
+  if(h>=1)return h+"h "+m+"m";
+  return m+"m "+s+"s";
+};
+
+const getBadges = w => {
+  const b=[], tot=w.reduce((a,x)=>a+x,0), avg=tot/w.length, mx=Math.max(...w);
+  let str=0,best=0;
+  for(let i=1;i<w.length;i++){if(w[i]>=w[i-1])best=Math.max(best,++str);else str=0;}
+  const allMax = Math.max(...SEASON_STATS.map(p=>Math.max(...p.weeks)));
+  if(mx>=allMax)b.push({icon:"🎯",label:"Perfect Week"});
+  if(best>=3)b.push({icon:"🔥",label:best+"wk Streak"});
+  if(avg>=9)b.push({icon:"⭐",label:"Sharp"});
+  const rank=SEASON_STATS.map(p=>p.weeks.reduce((a,x)=>a+x,0)).sort((a,c)=>c-a).indexOf(tot);
+  if(rank===0)b.push({icon:"👑",label:"Season Leader"});
+  return b;
+};
+
+// Team Logo component
+function TeamLogo({abbr, size=38}) {
+  const [err, setErr] = useState(false);
+  const src = logo(abbr);
+  if(!src || err) return h('div',{className:'team-logo-fallback',style:{width:size,height:size,background:tc(abbr),fontSize:size*0.28}},abbr);
+  return h('img',{src,alt:abbr,width:size,height:size,className:'team-logo',onError:()=>setErr(true)});
+}
+
+// Team pick button
+function TeamBtn({game, side, picked, onPick, disabled}) {
+  const abbr = game[side+"Abbr"], name = game[side], role = side==="away"?"Away":"Home";
+  const isPicked = picked === name;
+  return h('button',{
+    className:'team-btn',
+    style:{borderColor: isPicked?tc(abbr):"#e2e8f0", background: isPicked?tc(abbr)+"14":"#fff"},
+    onClick:()=>onPick(game.id, name),
+    disabled
+  },
+    h(TeamLogo,{abbr,size:36}),
+    h('div',null,
+      h('div',{className:'team-abbr'},abbr),
+      h('div',{className:'team-name'},name),
+      h('div',{className:'team-role'},role)
+    ),
+    isPicked && h('span',{className:'check'},"✓")
+  );
+}
+
+function App() {
+  const [view, setView] = useState("home");
+  const [week, setWeek] = useState(CURRENT_WEEK);
+  const [picks, setPicks] = useState({});
+  const [name, setName] = useState(""), [email, setEmail] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [payMethod, setPayMethod] = useState(null);
+  const [showPay, setShowPay] = useState(false);
+  const [payCtx, setPayCtx] = useState("regular");
+  const [toast, setToast] = useState(null);
+  const [countdown, setCountdown] = useState(null);
+  const [deadlinePassed, setDeadlinePassed] = useState(false);
+  const [mnfGuess, setMnfGuess] = useState("");
+
+  const [poTab, setPoTab] = useState("wildcard");
+  const [poPicks, setPoPicks] = useState({});
+  const [poName, setPoName] = useState("");
+  const [poSubmitted, setPoSubmitted] = useState(false);
+  const [sbPick, setSbPick] = useState("");
+  const [sbPts, setSbPts] = useState("");
+
+  const [adminPwd, setAdminPwd] = useState("");
+  const [adminOk, setAdminOk] = useState(false);
+  const [adminPwdErr, setAdminPwdErr] = useState(false);
+  const [adminTab, setAdminTab] = useState("payments");
+  const [adminWeek, setAdminWeek] = useState(CURRENT_WEEK);
+  const [entries, setEntries] = useState({1:[
+    {id:"e1",name:"Mike T.", paid:true, voided:false,method:"cashapp"},
+    {id:"e2",name:"Sarah K.",paid:true, voided:false,method:"zelle"},
+    {id:"e3",name:"Jason R.",paid:false,voided:false,method:"cashapp"},
+    {id:"e4",name:"Linda M.",paid:false,voided:false,method:"zelle"},
+    {id:"e5",name:"Dave P.", paid:true, voided:false,method:"cashapp"},
+    {id:"e6",name:"Tanya B.",paid:false,voided:false,method:"cashapp"},
+  ]});
+  const [results, setResults] = useState({1:{scores:{}}});
+  const [players, setPlayers] = useState(INIT_PLAYERS);
+  const [payLog, setPayLog] = useState(INIT_PAY_LOG);
+  const [logPlayer, setLogPlayer] = useState("");
+  const [logAmt, setLogAmt] = useState("12");
+  const [logMethod, setLogMethod] = useState("cashapp");
+  const [logNote, setLogNote] = useState("");
+  const [selPlayer, setSelPlayer] = useState(null);
+  const [statsPlayer, setStatsPlayer] = useState(null);
+  const [regName,setRegName]=useState(""),[regEmail,setRegEmail]=useState(""),
+        [regPhone,setRegPhone]=useState(""),[regDone,setRegDone]=useState(false);
+
+  const games = NFL_WEEKS[week]||[];
+  const totalPicks = Object.keys(picks).length;
+  const allPicked = totalPicks===games.length;
+  const poGames = Object.values(PLAYOFF_BRACKET).flat();
+  const totalPoPicks = Object.keys(poPicks).length;
+  const allPoPicked = totalPoPicks===poGames.length;
+  const wkEntries = entries[adminWeek]||[];
+
+  useEffect(()=>{
+    const dl = WEEK_DEADLINES[week];
+    if(!dl)return;
+    const tick=()=>{const ms=new Date(dl)-new Date();setDeadlinePassed(ms<=0);setCountdown(ms>0?fmt(ms):null);};
+    tick();const t=setInterval(tick,1000);return()=>clearInterval(t);
+  },[week]);
+
+  const showToast=(msg,type="success")=>{setToast({msg,type});setTimeout(()=>setToast(null),3200);};
+
+  const computed = STANDINGS.map(p=>({...p,total:p.voided?0:p.regPts+p.playoffPts}));
+  const active = computed.filter(p=>!p.voided);
+  const numPaid = computed.filter(p=>p.paid&&!p.voided).length;
+  const weekPot = numPaid*BASE_WEEKLY_FEE;
+  const maxReg = Math.max(...active.map(p=>p.regPts),0);
+  const wkWinners = active.filter(p=>p.regPts===maxReg&&maxReg>0);
+  const winShare = wkWinners.length>0?Math.round(weekPot/wkWinners.length):0;
+
+  const playerBal = pn => {
+    const paid = payLog.filter(l=>l.player===pn).reduce((s,l)=>s+l.amount,0);
+    const wksIn = Object.values(entries).flat().filter(e=>e.name===pn&&!e.voided).length;
+    return {paid,owed:wksIn*ENTRY_FEE,balance:paid-wksIn*ENTRY_FEE,weeks:wksIn};
+  };
+
+  const resetReg=()=>{setPicks({});setSubmitted(false);setName("");setEmail("");setPayMethod(null);setMnfGuess("");};
+  const resetPo=()=>{setPoPicks({});setPoSubmitted(false);setPoName("");setSbPick("");setSbPts("");};
+
+  const handleSubmit=()=>{
+    if(!name.trim()){showToast("Enter your name!","error");return;}
+    if(!allPicked){showToast("Make all picks first!","error");return;}
+    if(!mnfGuess){showToast("Enter MNF tiebreaker score!","error");return;}
+    if(deadlinePassed){showToast("Deadline passed!","error");return;}
+    setPayCtx("regular");setShowPay(true);
+  };
+
+  const handlePoSubmit=()=>{
+    if(!poName.trim()){showToast("Enter your name!","error");return;}
+    if(!allPoPicked){showToast("Make all playoff picks!","error");return;}
+    if(!sbPick.trim()){showToast("Enter Super Bowl pick!","error");return;}
+    if(!sbPts.trim()){showToast("Enter Super Bowl total pts guess!","error");return;}
+    setPayCtx("playoff");setShowPay(true);
+  };
+
+  const confirmPay=method=>{
+    setPayMethod(method);setShowPay(false);
+    if(payCtx==="regular"){
+      setSubmitted(true);
+      const e={id:"e"+Date.now(),name,picks:{...picks},paid:false,voided:false,method};
+      setEntries(prev=>({...prev,[week]:[...(prev[week]||[]),e]}));
+      showToast("Picks locked! Send $"+ENTRY_FEE+" via "+(method==="cashapp"?"Cash App":"Zelle")+" — unpaid picks voided at kickoff.");
+    } else {
+      setPoSubmitted(true);
+      showToast("Bracket locked! Send $"+PLAYOFF_FEE+" via "+(method==="cashapp"?"Cash App":"Zelle")+".");
+    }
+  };
+
+  const togglePaid=(w,id)=>setEntries(p=>({...p,[w]:p[w].map(e=>e.id===id?{...e,paid:!e.paid,voided:e.paid?e.voided:false}:e)}));
+  const toggleVoid=(w,id)=>setEntries(p=>({...p,[w]:p[w].map(e=>e.id===id?{...e,voided:!e.voided}:e)}));
+  const voidUnpaid=w=>{setEntries(p=>({...p,[w]:(p[w]||[]).map(e=>!e.paid?{...e,voided:true}:e)}));showToast("All unpaid Week "+w+" entries voided.","error");};
+  const addPayLog=()=>{if(!logPlayer){showToast("Select player!","error");return;}setPayLog(p=>[...p,{id:"pay"+Date.now(),player:logPlayer,week:adminWeek,amount:Number(logAmt),method:logMethod,date:new Date().toISOString().split("T")[0],note:logNote}]);setLogNote("");showToast("Payment recorded!");};
+  const updateResult=(w,gid,field,val)=>setResults(p=>({...p,[w]:{...p[w],scores:{...(p[w]?.scores||{}),[gid]:{...(p[w]?.scores?.[gid]||{}),[field]:Number(val)}}}}));
+  const addPlayer=()=>{if(!regName){showToast("Enter name!","error");return;}setPlayers(p=>[...p,{id:"p"+Date.now(),name:regName,email:regEmail,phone:regPhone,joined:"Week "+CURRENT_WEEK}]);setRegDone(true);showToast("Welcome "+regName+"! 🏈");};
+
+  const cdColor = !countdown?"#dc2626":countdown.includes("d")?"#16a34a":countdown.includes("h")?"#d97706":"#dc2626";
+
+  const Nav=()=>h('nav',null,
+    h('div',{className:'logo',onClick:()=>{setView("home");resetReg();}},
+      h('span',null,"🏈 "),h('span',{style:{color:'#1d4ed8'}},"MxPlk "),"Gridiron Picks",
+      h('small',null,"2026–2027 NFL Season")
+    ),
+    h('div',{className:'navbtns'},
+      ["home","picks","allpicks","playoffs","leaderboard","payouts","stats","register","rules","admin"].map(v=>
+        h('button',{key:v,className:'navbtn'+(view===v?" active":""),onClick:()=>setView(v)},
+          {home:"🏠 Home",picks:"📋 Weekly",allpicks:"👀 All Picks",playoffs:"🏆 Playoffs",leaderboard:"📊 Standings",payouts:"💰 Payouts",stats:"📈 Stats",register:"✏️ Register",rules:"📜 Rules",admin:"🔐 Admin"}[v]
+        )
+      )
+    )
+  );
+
+  const PayModal=()=>showPay&&h('div',{className:'modal-overlay'},
+    h('div',{className:'modal'},
+      h('div',{style:{textAlign:'center',marginBottom:16}},
+        h('div',{style:{fontSize:36,marginBottom:6}},payCtx==="playoff"?"🏆":"🏈"),
+        h('h2',null,"Confirm Entry"),
+        h('p',null,"Pay $"+(payCtx==="playoff"?PLAYOFF_FEE:ENTRY_FEE)+" to lock in your "+(payCtx==="playoff"?"Playoff Bracket":"Week "+week+" picks")),
+        payCtx==="regular"&&h('div',{className:'void-warning'},"⚠️ Picks are voided automatically at kickoff if unpaid.")
+      ),
+      h('button',{className:'pay-btn pay-btn-ca',onClick:()=>confirmPay("cashapp")},
+        h('span',{className:'pay-icon'},"💵"),h('div',null,h('div',{className:'pay-label'},"Cash App"),h('div',{className:'pay-handle'},PAYMENT_INFO.cashapp))
+      ),
+      h('button',{className:'pay-btn pay-btn-z',onClick:()=>confirmPay("zelle")},
+        h('span',{className:'pay-icon'},"📱"),h('div',null,h('div',{className:'pay-label'},"Zelle"),h('div',{className:'pay-handle'},PAYMENT_INFO.zelle))
+      ),
+      h('p',{className:'modal-note'},"Include your name in the memo. Commissioner marks you paid once received."),
+      h('button',{className:'btn btn-outline',style:{width:'100%',marginTop:4},onClick:()=>setShowPay(false)},"Cancel")
+    )
+  );
+
+  // ── VIEWS ──
+  const HomeView=()=>h('div',null,
+    h('div',{className:'hero'},
+      h('h1',null,"MxPlk Gridiron Picks"),
+      h('p',null,"Pick winners every week, enter the playoff bracket, and compete for the season title."),
+      h('div',{className:'hero-actions'},
+        h('button',{className:'btn btn-primary',onClick:()=>setView("picks")},"Weekly Picks →"),
+        h('button',{className:'btn btn-red',onClick:()=>setView("playoffs")},"🏆 Playoff Bracket"),
+        h('button',{className:'btn btn-outline',onClick:()=>setView("leaderboard")},"View Standings")
+      )
+    ),
+    h('div',{className:'grid3'},
+      [{label:"Weekly Entry",value:"$"+ENTRY_FEE,icon:"💵",sub:"$"+BASE_WEEKLY_FEE+" pot + $"+SEASON_KING_FEE+" king fund"},
+       {label:"Playoff Entry",value:"$"+PLAYOFF_FEE,icon:"🏆"},
+       {label:"Current Week",value:"Week "+CURRENT_WEEK,icon:"📅"},
+       {label:"Players",value:"14",icon:"👥"}
+      ].map((s,i)=>h('div',{key:i,className:'stat-card'},
+        h('div',{style:{fontSize:24}},s.icon),
+        h('div',{className:'stat-val'},s.value),
+        h('div',{className:'stat-lbl'},s.label),
+        s.sub&&h('div',{className:'stat-sub'},s.sub)
+      ))
+    ),
+    h('div',{className:'grid2'},
+      [{title:"🏅 Weekly Winner Takes All",desc:"Most correct picks each week wins 100% of that week's pot. Ties split evenly."},
+       {title:"👑 Regular Season King",desc:"$2/entry/week builds a fund. Most correct picks over 18 weeks wins it all."},
+       {title:"🏆 Playoff Tiebreakers",desc:"Tied? 1st: who picked Super Bowl winner. 2nd: closest combined Super Bowl score without going over."},
+       {title:"👀 All Picks Revealed",desc:"Once deadline passes, everyone's picks are revealed in the All Picks tab."}
+      ].map((c,i)=>h('div',{key:i,className:'info-card'},h('div',{className:'info-title'},c.title),h('p',null,c.desc)))
+    ),
+    h('div',{className:'policy-box'},
+      h('span',null,"⚠️"),
+      h('div',null,"Payment must be confirmed by the commissioner before kickoff. Unpaid picks are automatically voided.")
+    )
+  );
+
+  const PicksView=()=>h('div',null,
+    h('div',{style:{display:'flex',justifyContent:'space-between',alignItems:'flex-start',flexWrap:'wrap',gap:8,marginBottom:14}},
+      h('div',null,
+        h('h2',null,"Week "+week+" Picks"),
+        countdown&&!deadlinePassed&&h('div',{className:'countdown',style:{color:cdColor,borderColor:cdColor}},"⏱ Deadline in "+countdown),
+        deadlinePassed&&h('div',{className:'countdown',style:{color:'#dc2626',borderColor:'#dc2626',background:'#fef2f2'}},"🔒 Picks closed")
+      ),
+      h('div',{className:'week-tabs'},
+        Object.keys(NFL_WEEKS).map(w=>h('button',{key:w,className:'week-tab'+(week===Number(w)?" active":""),onClick:()=>{setWeek(Number(w));resetReg();}},"Wk "+w))
+      )
+    ),
+    !deadlinePassed&&!submitted&&h('div',{className:'input-row'},
+      h('input',{placeholder:"Your Name *",value:name,onChange:e=>setName(e.target.value)}),
+      h('input',{placeholder:"Email (optional)",value:email,onChange:e=>setEmail(e.target.value)})
+    ),
+    deadlinePassed&&h('div',{className:'banner banner-red'},"🔒 This week's picks are closed. Check All Picks tab to see submissions."),
+    submitted&&!deadlinePassed&&h('div',{className:'banner banner-green'},
+      "✅ Picks locked! "+name+" — Week "+week+" · "+totalPicks+"/"+games.length+" picks",
+      h('span',{style:{color:'#b45309',fontSize:12}},"⚠️ Send $"+ENTRY_FEE+" via "+(payMethod==="cashapp"?"Cash App: "+PAYMENT_INFO.cashapp:"Zelle: "+PAYMENT_INFO.zelle)+" before kickoff or picks are voided!")
+    ),
+    !deadlinePassed&&MNF_GAMES[week]&&!submitted&&h('div',{className:'mnf-box'},
+      h('div',{style:{fontSize:14,fontWeight:800,color:'#92400e',marginBottom:4}},"🏈 Monday Night Football Tiebreaker — Price is Right Rules!"),
+      h('p',{style:{fontSize:12,color:'#78716c',marginBottom:10}},MNF_GAMES[week].away+" @ "+MNF_GAMES[week].home+" — Closest combined score WITHOUT going over wins the pot if tied."),
+      h('div',{style:{display:'flex',alignItems:'center',gap:10}},
+        h('input',{type:'number',placeholder:'Total pts (e.g. 47)',value:mnfGuess,onChange:e=>setMnfGuess(e.target.value),style:{maxWidth:180}}),
+        mnfGuess&&h('span',{style:{fontSize:13,color:'#92400e'}},"Your guess: "+mnfGuess+" pts")
+      )
+    ),
+    h('div',{className:'progress-wrap'},
+      h('div',{className:'progress-bar'},h('div',{className:'progress-fill',style:{width:(totalPicks/games.length*100)+"%"}})),
+      h('span',{className:'progress-lbl'},totalPicks+" / "+games.length+" picks made")
+    ),
+    h('div',{className:'grid4'},
+      games.map(game=>h('div',{key:game.id,className:'game-card'+(picks[game.id]?" picked":"")+(deadlinePassed?" closed":"")},
+        h('div',{className:'game-time'},game.time+" · ",h('span',{className:'spread'},game.spread)),
+        h('div',{className:'matchup'},
+          h(TeamBtn,{game,side:"away",picked:picks[game.id],onPick:(id,t)=>!submitted&&!deadlinePassed&&setPicks(p=>({...p,[id]:t})),disabled:submitted||deadlinePassed}),
+          h('div',{className:'vs'},"vs"),
+          h(TeamBtn,{game,side:"home",picked:picks[game.id],onPick:(id,t)=>!submitted&&!deadlinePassed&&setPicks(p=>({...p,[id]:t})),disabled:submitted||deadlinePassed})
+        )
+      ))
+    ),
+    !submitted&&!deadlinePassed&&h('div',{className:'submit-row'},
+      h('div',{className:'submit-status'},allPicked&&mnfGuess?"✅ All picks made!":!allPicked?(games.length-totalPicks)+" picks remaining":"Enter MNF tiebreaker above"),
+      h('button',{className:'btn btn-primary',style:{opacity:(allPicked&&mnfGuess)?1:.5},onClick:handleSubmit,disabled:!allPicked||!mnfGuess},"Submit Picks & Pay $"+ENTRY_FEE+" →")
+    ),
+    submitted&&h('div',{className:'submit-row'},
+      h('button',{className:'btn btn-outline',onClick:resetReg},"+ New Entry (Different Name)")
+    )
+  );
+
+  const AllPicksView=()=>h('div',null,
+    h('h2',{style:{marginBottom:8}},"👀 All Picks — Week "+week),
+    h('div',{className:'week-tabs',style:{marginBottom:14}},
+      Object.keys(NFL_WEEKS).map(w=>h('button',{key:w,className:'week-tab'+(week===Number(w)?" active":""),onClick:()=>setWeek(Number(w))},"Wk "+w))
+    ),
+    !deadlinePassed
+      ? h('div',{className:'locked-box'},
+          h('div',{style:{fontSize:36,marginBottom:8}},"🔒"),
+          h('h3',null,"Picks still hidden"),
+          h('p',null,"Picks for Week "+week+" reveal once the deadline passes."+(countdown?" Reveal in "+countdown+".":""))
+        )
+      : h('div',null,
+          h('div',{className:'all-picks-scroll'},
+            h('table',null,
+              h('thead',null,h('tr',null,
+                h('th',{style:{textAlign:'left',paddingLeft:10}},"Player"),
+                (NFL_WEEKS[week]||[]).map(g=>h('th',{key:g.id},g.awayAbbr+"@"+g.homeAbbr))
+              )),
+              h('tbody',null,
+                (ALL_PICKS[week]||[]).map((pl,i)=>h('tr',{key:i,className:(pl.voided?"voided-row":i%2?"alt-row":"")},
+                  h('td',{style:{textAlign:'left',paddingLeft:10,whiteSpace:'nowrap'}},pl.name,pl.voided&&h('span',{className:'voided-tag'},"VOIDED")),
+                  (NFL_WEEKS[week]||[]).map(g=>{
+                    const pt=pl.picks[g.id];
+                    const ab=pt===g.away?g.awayAbbr:pt===g.home?g.homeAbbr:"—";
+                    return h('td',{key:g.id},h('span',{className:'pick-chip',style:{background:tc(ab)+"1A",color:tc(ab),borderColor:tc(ab)+"55"}},ab));
+                  })
+                ))
+              )
+            )
+          ),
+          h('h3',{style:{margin:'16px 0 8px'}},"📊 Pick Popularity"),
+          h('div',{className:'pop-grid'},
+            (NFL_WEEKS[week]||[]).map(g=>{
+              const all=(ALL_PICKS[week]||[]).filter(p=>!p.voided);
+              const tot=all.length,ac=all.filter(p=>p.picks[g.id]===g.away).length;
+              const ap=tot?Math.round(ac/tot*100):0,hp=100-ap;
+              return h('div',{key:g.id,className:'pop-card'},
+                h('div',{className:'pop-matchup'},g.awayAbbr+" @ "+g.homeAbbr),
+                h('div',{className:'pop-bar-wrap'},h('div',{style:{height:'100%',width:ap+"%",background:tc(g.awayAbbr),borderRadius:4}})),
+                h('div',{className:'pop-labels'},
+                  h('span',{style:{color:tc(g.awayAbbr)}},g.awayAbbr+" "+ap+"%"),
+                  h('span',{style:{color:tc(g.homeAbbr)}},hp+"% "+g.homeAbbr)
+                )
+              );
+            })
+          )
+        )
+  );
+
+  const PlayoffsView=()=>h('div',null,
+    h('div',{style:{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:10,marginBottom:12}},
+      h('div',null,h('h2',null,"🏆 Playoff Bracket"),h('p',null,"Pick every game · points increase each round")),
+      h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+        PLAYOFF_ROUNDS.map(r=>h('div',{key:r.id,style:{background:'#fff',border:'1px solid #e2e8f0',borderRadius:8,padding:'6px 10px',textAlign:'center'}},
+          h('div',{style:{fontSize:10,color:'#94a3b8'}},r.label),
+          h('div',{style:{fontSize:14,fontWeight:800,color:'#1d4ed8'}},r.points+"pt"+(r.points>1?"s":""))
+        ))
+      )
+    ),
+    h('div',{style:{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:10,padding:'10px 14px',marginBottom:12,display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:6,fontSize:13}},
+      h('span',null,"🏆 Playoff Entry: ",h('strong',{style:{color:'#1d4ed8'}},"$"+PLAYOFF_FEE)),
+      h('span',{style:{fontSize:12,color:'#94a3b8'}},"Deadline: Before Wild Card kickoff · Jan 10, 2027")
+    ),
+    !poSubmitted&&h('div',{className:'input-row'},h('input',{placeholder:"Your Name *",value:poName,onChange:e=>setPoName(e.target.value)})),
+    poSubmitted&&h('div',{className:'banner banner-green'},"🏆 Bracket locked! "+poName+" · "+totalPoPicks+"/"+poGames.length+" picks"),
+    h('div',{className:'progress-wrap'},
+      h('div',{className:'progress-bar'},h('div',{className:'progress-fill',style:{width:(totalPoPicks/poGames.length*100)+"%",background:'#b91c1c'}})),
+      h('span',{className:'progress-lbl'},totalPoPicks+" / "+poGames.length+" picks")
+    ),
+    h('div',{className:'round-tabs'},
+      PLAYOFF_ROUNDS.map(r=>{
+        const rg=PLAYOFF_BRACKET[r.id]||[],rp=rg.filter(g=>poPicks[g.id]).length;
+        return h('button',{key:r.id,className:'round-tab'+(poTab===r.id?" active":"")+(rp===rg.length?" done":""),onClick:()=>setPoTab(r.id)},
+          h('span',{className:'round-tab-label'},r.label),
+          h('span',{className:'round-tab-pts'},r.points+"pt"+(r.points>1?"s":"")),
+          h('span',{className:'round-tab-prog'},rp+"/"+rg.length+" ✓")
+        );
+      })
+    ),
+    PLAYOFF_ROUNDS.filter(r=>r.id===poTab).map(round=>{
+      const rg=PLAYOFF_BRACKET[round.id]||[];
+      const confColors={AFC:"#1d4ed8",NFC:"#b91c1c",SB:"#b45309"};
+      return h('div',{key:round.id},
+        h('div',{style:{background:'#fff',border:'1px solid #e2e8f0',borderRadius:10,padding:'10px 14px',marginBottom:10,display:'flex',gap:14,alignItems:'center',flexWrap:'wrap'}},
+          h('strong',null,round.label),
+          h('span',{style:{fontSize:11,color:'#94a3b8'}},"📅 "+round.date),
+          h('span',{style:{fontSize:12,color:'#b91c1c',fontWeight:700}},"+"+round.points+"pt"+(round.points>1?"s":"")+" per correct pick")
+        ),
+        h('div',{className:'grid4'},
+          rg.map(game=>{
+            const cc=confColors[game.conf]||"#94a3b8",picked=poPicks[game.id];
+            return h('div',{key:game.id,style:{background:'#fff',border:'1px solid #e2e8f0',borderTop:'3px solid '+cc,borderRadius:10,padding:'12px 14px'}},
+              h('div',{style:{fontSize:11,color:cc,fontWeight:700,marginBottom:8}},game.label||game.conf+" · "+round.label),
+              h('div',{className:'matchup'},
+                h('button',{className:'team-btn',style:{borderColor:picked===game.away?cc:"#e2e8f0",background:picked===game.away?cc+"14":"#fff"},onClick:()=>!poSubmitted&&setPoPicks(p=>({...p,[game.id]:game.away})),disabled:poSubmitted},
+                  h(TeamLogo,{abbr:game.awayAbbr,size:34}),
+                  h('div',null,h('div',{className:'team-abbr'},game.awayAbbr),h('div',{className:'team-name'},game.away)),
+                  picked===game.away&&h('span',{className:'check'},"✓")
+                ),
+                h('div',{className:'vs'},"vs"),
+                h('button',{className:'team-btn',style:{borderColor:picked===game.home?cc:"#e2e8f0",background:picked===game.home?cc+"14":"#fff"},onClick:()=>!poSubmitted&&setPoPicks(p=>({...p,[game.id]:game.home})),disabled:poSubmitted},
+                  h(TeamLogo,{abbr:game.homeAbbr,size:34}),
+                  h('div',null,h('div',{className:'team-abbr'},game.homeAbbr),h('div',{className:'team-name'},game.home)),
+                  picked===game.home&&h('span',{className:'check'},"✓")
+                )
+              ),
+              h('div',{style:{fontSize:10,color:'#b91c1c',fontWeight:700,textAlign:'right',marginTop:6}},"+"+round.points+"pt"+(round.points>1?"s":"")+" if correct")
+            );
+          })
+        )
+      );
+    }),
+    h('div',{className:'tb-box'},
+      h('div',{style:{display:'flex',gap:12,alignItems:'flex-start',marginBottom:8}},
+        h('span',{style:{fontSize:20}},"🏆"),
+        h('div',null,
+          h('div',{className:'tb-title'},"Super Bowl Tiebreakers"),
+          h('div',{className:'tb-desc'},"1st: who picks Super Bowl winner. 2nd (still tied): closest combined total WITHOUT going over wins.")
+        )
+      ),
+      h('div',{className:'tb-inputs'},
+        h('input',{placeholder:"Super Bowl Champion (e.g. Kansas City Chiefs)",value:sbPick,onChange:e=>setSbPick(e.target.value),disabled:poSubmitted,style:{flex:2,minWidth:220}}),
+        h('input',{type:'number',placeholder:'Combined pts (e.g. 47)',value:sbPts,onChange:e=>setSbPts(e.target.value),disabled:poSubmitted,style:{maxWidth:190}})
+      ),
+      (sbPick||sbPts)&&h('div',{className:'tb-confirm'},"🏆 Champion: ",h('strong',null,sbPick||"—")," | Total pts: ",h('strong',null,sbPts||"—"))
+    ),
+    !poSubmitted
+      ? h('div',{className:'submit-row'},
+          h('div',{className:'submit-status'},allPoPicked&&sbPick&&sbPts?"✅ All picks made!":(poGames.length-totalPoPicks)+" picks remaining"+((!sbPick||!sbPts)?" · add SB tiebreakers":"")),
+          h('button',{className:'btn btn-red',style:{opacity:(allPoPicked&&sbPick&&sbPts)?1:.5},onClick:handlePoSubmit,disabled:!allPoPicked||!sbPick||!sbPts},"Lock Bracket & Pay $"+PLAYOFF_FEE+" →")
+        )
+      : h('div',{className:'submit-row'},h('button',{className:'btn btn-outline',onClick:resetPo},"+ New Bracket (Different Name)"))
+  );
+
+  const LeaderView=()=>h('div',null,
+    h('h2',{style:{marginBottom:12}},"Standings · Week "+CURRENT_WEEK),
+    h('div',{className:'winner-banner'},
+      h('span',{style:{fontSize:24}},"🏅"),
+      h('div',null,
+        h('div',{className:'winner-name'},"This Week: "+(wkWinners.length?wkWinners.map(w=>w.name).join(" & "):"—")),
+        h('div',{className:'winner-desc'},"100% of pot ($"+weekPot+") goes to winner"+(wkWinners.length>1?". Split evenly — $"+winShare+" each.":wkWinners.length===1?". Payout: $"+winShare+".":"."))
+      )
+    ),
+    h('div',{className:'leader-table'},
+      h('div',{className:'leader-head'},
+        h('span',{style:{flex:.4}},"#"),h('span',{style:{flex:2}},"Player"),
+        h('span',{style:{flex:1}},"Reg"),h('span',{style:{flex:1}},"🏆 PO"),
+        h('span',{style:{flex:1}},"Total"),h('span',{style:{flex:1}},"Status")
+      ),
+      [...computed].sort((a,b)=>b.total-a.total).map((p,i)=>
+        h('div',{key:i,className:'leader-row'+(i===0&&!p.voided?" first":i%2?" alt":"")+(p.voided?" voided":"")},
+          h('span',{style:{flex:.4,fontWeight:800,color:p.voided?"#cbd5e1":i===0?"#d97706":i===1?"#94a3b8":i===2?"#b45309":"#64748b"}},p.voided?"—":i===0?"🥇":i===1?"🥈":i===2?"🥉":"#"+(i+1)),
+          h('span',{style:{flex:2,fontWeight:700}},p.name),
+          h('span',{style:{flex:1,color:p.voided?"#cbd5e1":"#2563eb"}},p.voided?"—":p.regPts),
+          h('span',{style:{flex:1,color:p.voided?"#cbd5e1":"#b91c1c"}},p.voided?"—":p.playoffPts),
+          h('span',{style:{flex:1,fontWeight:800,color:p.voided?"#cbd5e1":"#16a34a"}},p.voided?"—":p.total),
+          h('span',{style:{flex:1}},p.voided?h('span',{className:'badge-voided'},"Voided"):p.paid?h('span',{className:'badge-paid'},"Paid"):h('span',{className:'badge-pending'},"Pending"))
+        )
+      )
+    ),
+    h('div',{className:'king-banner'},
+      h('span',{style:{fontSize:24}},"👑"),
+      h('div',{style:{flex:1}},
+        h('div',{className:'king-title'},"Regular Season King"),
+        h('p',{style:{fontSize:12,color:'#15803d'}},"Most correct picks after Week 18 wins the fund.")
+      ),
+      h('div',{className:'king-pot'},
+        h('div',{style:{fontSize:10,color:'#94a3b8',marginBottom:3}},"Est. King Fund"),
+        h('div',{className:'king-pot-val'},"$"+(SEASON_KING_FEE*14*18)),
+        h('div',{style:{fontSize:10,color:'#94a3b8'}},"14 players · 18 weeks")
+      )
+    ),
+    h('div',{style:{background:'#fff',border:'1px solid #e2e8f0',borderRadius:10,padding:'12px 14px',marginBottom:14,display:'flex',gap:10,fontSize:12,color:'#475569',lineHeight:1.6}},
+      h('span',null,"🏆"),h('span',null,h('strong',null,"Playoff tiebreaker:")," Super Bowl winner pick decides ties. Still tied? Closest combined score without going over wins.")
+    ),
+    h('div',{className:'payment-box'},
+      h('h3',{style:{marginBottom:10}},"💳 Payment Info"),
+      h('div',{className:'pay-methods'},
+        h('div',{className:'pay-method'},h('span',{style:{fontSize:22}},"💵"),h('div',null,h('div',{className:'pay-method-label'},"Cash App"),h('div',{className:'pay-method-handle'},PAYMENT_INFO.cashapp))),
+        h('div',{className:'pay-method'},h('span',{style:{fontSize:22}},"📱"),h('div',null,h('div',{className:'pay-method-label'},"Zelle"),h('div',{className:'pay-method-handle'},PAYMENT_INFO.zelle)))
+      ),
+      h('p',{style:{fontSize:13,color:'#64748b'}},"Weekly: $"+ENTRY_FEE+"/week ($"+BASE_WEEKLY_FEE+" pot + $"+SEASON_KING_FEE+" King) · Playoff: $"+PLAYOFF_FEE+" · Include your name in memo!")
+    )
+  );
+
+  const PayoutsView=()=>{
+    const king=computed.filter(p=>!p.voided&&p.paid).sort((a,b)=>b.total-a.total)[0];
+    const kingFund=SEASON_KING_FEE*numPaid*18;
+    const smsMsg=(msg)=>"sms:?&body="+encodeURIComponent(msg);
+    return h('div',null,
+      h('h2',{style:{marginBottom:4}},"💰 Payouts"),
+      h('p',{style:{marginBottom:14}},"Auto-calculated · Commissioner sends manually via Cash App or Zelle"),
+      h('div',{className:'payout-overview'},
+        [{icon:"🏈",label:"Week "+CURRENT_WEEK+" Pot",val:"$"+weekPot,sub:numPaid+" paid × $"+BASE_WEEKLY_FEE+" · winner takes all"},
+         {icon:"👑",label:"Season King Fund",val:"$"+(SEASON_KING_FEE*numPaid*CURRENT_WEEK),sub:"$"+SEASON_KING_FEE+"/entry × "+CURRENT_WEEK+" wk · paid after Wk 18"},
+         {icon:"🏆",label:"Playoff Pool",val:"$0",sub:"Opens after Week 18 · winner takes all"}
+        ].map((c,i)=>h('div',{key:i,className:'pov-card'},
+          h('div',{className:'pov-icon'},c.icon),
+          h('div',{className:'pov-label'},c.label),
+          h('div',{className:'pov-val'},c.val),
+          h('div',{className:'pov-sub'},c.sub)
+        ))
+      ),
+      h('h3',{style:{margin:'0 0 8px'}},"🏅 This Week's Winner — Pay Now"),
+      wkWinners.length===0
+        ? h('div',{style:{background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:10,padding:14,color:'#94a3b8',fontSize:13,textAlign:'center'}},"No scores entered yet for Week "+CURRENT_WEEK+".")
+        : wkWinners.map((w,i)=>h('div',{key:i,className:'payout-card'},
+            h('div',null,h('div',{className:'payout-name'},w.name),h('div',{className:'payout-detail'},w.regPts+" correct picks · Week "+CURRENT_WEEK+(wkWinners.length>1?" (tied — split)":""))),
+            h('div',{style:{textAlign:'right'}},h('div',{className:'payout-amt'},"$"+winShare),h('div',{className:'payout-lbl'},"100% of pot"+(wkWinners.length>1?", split "+wkWinners.length+" ways":"")))
+          )),
+      h('h3',{style:{margin:'16px 0 8px',color:'#15803d'}},"👑 Season King — Current Leader"),
+      king
+        ? h('div',{className:'payout-card',style:{background:'#f0fdf4',borderColor:'#bbf7d0'}},
+            h('div',null,h('div',{className:'payout-name',style:{color:'#15803d'}},king.name),h('div',{className:'payout-detail'},king.total+" total pts · leading Week "+CURRENT_WEEK+" of 18")),
+            h('div',{style:{textAlign:'right'}},h('div',{className:'payout-amt',style:{color:'#16a34a'}},"$"+kingFund),h('div',{className:'payout-lbl'},"est. full season fund · paid after Wk 18"))
+          )
+        : h('div',{style:{color:'#94a3b8',fontSize:13}},"No active paid players."),
+      h('div',{className:'payment-box',style:{marginTop:16}},
+        h('h3',{style:{marginBottom:10}},"📱 Text Reminders"),
+        h('p',{style:{fontSize:13,color:'#475569',marginBottom:12}},"Tap to open your messaging app with a pre-written message — select your group chat and send!"),
+        [
+          {label:"📋 Pick Deadline Reminder",color:"#fffbeb",bc:"#fde68a",tc:"#92400e",
+           msg:"🏈 MxPlk Gridiron Picks — Week "+CURRENT_WEEK+" Reminder!\n\nPicks due before Thursday kickoff! Pay $"+ENTRY_FEE+" or picks are VOIDED!\n\n💵 Cash App: "+PAYMENT_INFO.cashapp+"\n📱 Zelle: "+PAYMENT_INFO.zelle+"\n\nInclude your name in the memo. Good luck! 🏈"},
+          {label:"⚠️ Unpaid Warning",color:"#fef2f2",bc:"#fca5a5",tc:"#b91c1c",
+           msg:"⚠️ MxPlk Gridiron Picks — Payment Reminder!\n\nYou have an outstanding $"+ENTRY_FEE+" for Week "+CURRENT_WEEK+". Picks VOIDED if not paid before kickoff!\n\n💵 Cash App: "+PAYMENT_INFO.cashapp+"\n📱 Zelle: "+PAYMENT_INFO.zelle},
+          {label:"🏆 Playoff Bracket Open",color:"#eff6ff",bc:"#bfdbfe",tc:"#1d4ed8",
+           msg:"🏆 MxPlk Gridiron Picks — Playoff Bracket Open!\n\nSubmit your playoff bracket before Wild Card kickoff Jan 10, 2027.\n\nEntry: $"+PLAYOFF_FEE+"\n💵 Cash App: "+PAYMENT_INFO.cashapp+"\n📱 Zelle: "+PAYMENT_INFO.zelle},
+          {label:"🏅 Send Weekly Results",color:"#f0fdf4",bc:"#bbf7d0",tc:"#15803d",
+           msg:"🏅 MxPlk Gridiron Picks — Week "+CURRENT_WEEK+" Results!\n\nWeek winner: "+(wkWinners.map(w=>w.name).join(" & ")||"TBD")+(winShare?" — $"+winShare+" payout!":"")+"\n\nCheck standings: https://mxplk-gridiron.netlify.app 🏈"},
+        ].map((r,i)=>h('a',{key:i,href:smsMsg(r.msg),style:{display:'flex',alignItems:'center',gap:10,padding:'11px 14px',background:r.color,border:'1px solid '+r.bc,borderRadius:10,color:r.tc,textDecoration:'none',fontWeight:700,fontSize:13,marginBottom:8}},r.label))
+      )
+    );
+  };
+
+  const AdminView=()=>!adminOk
+    ? h('div',{className:'login-box'},
+        h('div',{style:{fontSize:40,marginBottom:10}},"🔐"),
+        h('h2',null,"Commissioner Login"),
+        h('p',{style:{marginBottom:16}},"Enter your PIN to access the admin panel"),
+        h('div',{style:{display:'flex',gap:8,justifyContent:'center',flexWrap:'wrap'}},
+          h('input',{type:'password',maxLength:6,placeholder:'••••',value:adminPwd,
+            style:{maxWidth:140,textAlign:'center',letterSpacing:8,fontSize:20,borderColor:adminPwdErr?"#dc2626":"#cbd5e1"},
+            onChange:e=>setAdminPwd(e.target.value),
+            onKeyDown:e=>{if(e.key==="Enter"){if(adminPwd===ADMIN_PIN){setAdminOk(true);setAdminPwdErr(false);}else{setAdminPwdErr(true);setTimeout(()=>setAdminPwdErr(false),2000);}}}}),
+          h('button',{className:'btn btn-primary',onClick:()=>{if(adminPwd===ADMIN_PIN){setAdminOk(true);setAdminPwdErr(false);}else{setAdminPwdErr(true);setTimeout(()=>setAdminPwdErr(false),2000);}}},"Unlock →")
+        ),
+        adminPwdErr&&h('p',{style:{color:'#dc2626',marginTop:10,fontWeight:700}},"❌ Incorrect PIN")
+      )
+    : h('div',null,
+        h('div',{style:{display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:10,marginBottom:14}},
+          h('div',null,h('h2',null,"🔐 Commissioner Panel"),h('p',null,"Mark payments · enter results · manage players")),
+          h('button',{className:'btn btn-outline',onClick:()=>{setAdminOk(false);setAdminPwd("");}},"Lock Panel")
+        ),
+        h('div',{className:'admin-tabs'},
+          [{id:"payments",label:"💳 Payments"},{id:"paylog",label:"💰 Payment Log"},{id:"results",label:"🏈 Results"},{id:"players",label:"👥 Players"}].map(t=>
+            h('button',{key:t.id,className:'admin-tab'+(adminTab===t.id?" active":""),onClick:()=>setAdminTab(t.id)},t.label)
+          )
+        ),
+
+        adminTab==="payments"&&h('div',null,
+          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:10,flexWrap:'wrap'}},
+            h('span',{style:{fontSize:12,color:'#64748b',fontWeight:700}},"Managing Week:"),
+            Object.keys(NFL_WEEKS).map(w=>h('button',{key:w,className:'week-tab'+(adminWeek===Number(w)?" active":""),onClick:()=>setAdminWeek(Number(w))},"Wk "+w))
+          ),
+          h('div',{style:{background:'#fff',border:'1px solid #e2e8f0',borderRadius:10,padding:'12px 14px',marginBottom:12,display:'flex',justifyContent:'space-between',flexWrap:'wrap',gap:8}},
+            h('div',null,
+              h('div',{style:{fontSize:11,color:'#94a3b8'}},"Week "+adminWeek+" deadline"),
+              h('div',{style:{fontSize:14,fontWeight:800,color:'#1d4ed8'}},WEEK_DEADLINES[adminWeek]?new Date(WEEK_DEADLINES[adminWeek]).toLocaleString():"TBD"),
+              countdown&&adminWeek===week&&h('div',{style:{fontSize:12,color:cdColor,marginTop:3}},"⏱ "+countdown+" remaining")
+            ),
+            h('button',{className:'void-all-btn',onClick:()=>voidUnpaid(adminWeek)},"🚫 Void All Unpaid — Wk "+adminWeek)
+          ),
+          h('div',{className:'admin-table'},
+            h('div',{className:'admin-head'},
+              h('span',{style:{flex:2}},"Player"),h('span',{style:{flex:1}},"Method"),
+              h('span',{style:{flex:1.5}},"Payment"),h('span',{style:{flex:1.5}},"Status")
+            ),
+            wkEntries.length===0&&h('div',{style:{padding:'14px 16px',color:'#94a3b8',fontSize:13}},"No entries for Week "+adminWeek+" yet."),
+            wkEntries.map(e=>h('div',{key:e.id,className:'admin-row'+(e.voided?" voided-row":e.paid?" paid-row":"")},
+              h('span',{style:{flex:2,fontWeight:700,color:e.voided?"#cbd5e1":"#1e293b"}},e.name),
+              h('span',{style:{flex:1,fontSize:12,color:'#64748b'}},e.method==="cashapp"?"💵 CashApp":"📱 Zelle"),
+              h('span',{style:{flex:1.5}},
+                h('button',{className:'toggle-btn',style:{background:e.paid?"#dcfce7":"#fef3c7",borderColor:e.paid?"#16a34a":"#d97706",color:e.paid?"#15803d":"#b45309"},onClick:()=>togglePaid(adminWeek,e.id)},e.paid?"✓ Paid":"⏳ Mark Paid")
+              ),
+              h('span',{style:{flex:1.5}},
+                h('button',{className:'toggle-btn',style:{background:e.voided?"#fee2e2":e.paid?"#dcfce7":"#ffedd5",borderColor:e.voided?"#dc2626":e.paid?"#16a34a":"#ea580c",color:e.voided?"#b91c1c":e.paid?"#15803d":"#c2410c"},onClick:()=>toggleVoid(adminWeek,e.id)},e.voided?"🚫 Voided":e.paid?"✅ Active":"⚠️ Pending")
+              )
+            ))
+          ),
+          h('div',{className:'sum-grid'},
+            [{label:"Entries",val:wkEntries.length,c:"#1e293b"},
+             {label:"Paid",val:wkEntries.filter(e=>e.paid).length,c:"#16a34a"},
+             {label:"Pending",val:wkEntries.filter(e=>!e.paid&&!e.voided).length,c:"#d97706"},
+             {label:"Voided",val:wkEntries.filter(e=>e.voided).length,c:"#dc2626"},
+             {label:"Pot (Winner Takes All)",val:"$"+wkEntries.filter(e=>e.paid).length*BASE_WEEKLY_FEE,c:"#1d4ed8"},
+             {label:"King Fund",val:"$"+wkEntries.filter(e=>e.paid).length*SEASON_KING_FEE,c:"#15803d"},
+            ].map((s,i)=>h('div',{key:i,className:'sum-card'},h('div',{className:'sum-val',style:{color:s.c}},s.val),h('div',{className:'sum-lbl'},s.label)))
+          )
+        ),
+
+        adminTab==="paylog"&&h('div',null,
+          h('div',{className:'paylog-form'},
+            h('h3',{style:{marginBottom:10}},"📥 Record a Payment"),
+            h('div',{style:{display:'flex',gap:8,flexWrap:'wrap',alignItems:'center'}},
+              h('select',{value:logPlayer,onChange:e=>setLogPlayer(e.target.value),style:{flex:1,minWidth:130,padding:'10px 12px',border:'1px solid #cbd5e1',borderRadius:8,fontFamily:'inherit',fontSize:13}},
+                h('option',{value:""},"Select Player..."),
+                players.map(p=>h('option',{key:p.id,value:p.name},p.name))
+              ),
+              h('select',{value:adminWeek,onChange:e=>setAdminWeek(Number(e.target.value)),style:{padding:'10px 12px',border:'1px solid #cbd5e1',borderRadius:8,fontFamily:'inherit',fontSize:13}},
+                Object.keys(NFL_WEEKS).map(w=>h('option',{key:w,value:w},"Week "+w))
+              ),
+              h('input',{type:'number',value:logAmt,onChange:e=>setLogAmt(e.target.value),placeholder:'Amount',style:{maxWidth:90}}),
+              h('select',{value:logMethod,onChange:e=>setLogMethod(e.target.value),style:{padding:'10px 12px',border:'1px solid #cbd5e1',borderRadius:8,fontFamily:'inherit',fontSize:13}},
+                h('option',{value:'cashapp'},"💵 Cash App"),h('option',{value:'zelle'},"📱 Zelle"),h('option',{value:'cash'},"💴 Cash")
+              ),
+              h('input',{placeholder:'Note (optional)',value:logNote,onChange:e=>setLogNote(e.target.value),style:{flex:2}}),
+              h('button',{className:'btn btn-primary',onClick:addPayLog},"+ Record")
+            )
+          ),
+          h('h3',{style:{margin:'16px 0 8px'}},"📊 Running Balance"),
+          h('div',{className:'bal-grid'},
+            players.map((p,i)=>{
+              const bal=playerBal(p.name);
+              return h('div',{key:i,className:'bal-card',style:{borderColor:bal.balance>=0?"#bbf7d0":"#fecaca"},onClick:()=>setSelPlayer(selPlayer===p.name?null:p.name)},
+                h('div',{className:'bal-top'},
+                  h('div',{className:'bal-name'},p.name),
+                  h('div',{className:'bal-status',style:{background:bal.balance>=0?"#dcfce7":"#fee2e2",color:bal.balance>=0?"#15803d":"#b91c1c"}},bal.balance>=0?"✓ +$"+bal.balance:"⚠ -$"+Math.abs(bal.balance))
+                ),
+                h('div',{className:'bal-row'},
+                  [{v:"$"+bal.paid,l:"Paid"},{v:"$"+bal.owed,l:"Owed"},{v:bal.weeks,l:"Weeks"}].map((x,j)=>h('div',{key:j,className:'bal-item'},h('div',{className:'bal-val'},x.v),h('div',{className:'bal-lbl'},x.l)))
+                ),
+                selPlayer===p.name&&h('div',{style:{marginTop:8}},
+                  h('div',{style:{fontSize:11,fontWeight:700,color:'#64748b',marginBottom:4}},"Payment History"),
+                  payLog.filter(l=>l.player===p.name).length===0
+                    ? h('div',{style:{fontSize:12,color:'#94a3b8'}},"No payments recorded.")
+                    : payLog.filter(l=>l.player===p.name).map((l,j)=>h('div',{key:j,className:'hist-row'},
+                        h('span',{style:{color:'#94a3b8',minWidth:80}},l.date),
+                        h('span',{style:{color:'#475569',minWidth:30}},"Wk "+l.week),
+                        h('span',{style:{color:l.method==="cashapp"?"#16a34a":l.method==="zelle"?"#7c3aed":"#d97706",fontWeight:700,minWidth:80}},l.method==="cashapp"?"💵 CashApp":l.method==="zelle"?"📱 Zelle":"💴 Cash"),
+                        h('span',{style:{color:'#16a34a',fontWeight:800}},"$"+l.amount),
+                        l.note&&h('span',{style:{color:'#94a3b8',fontStyle:'italic'}},l.note)
+                      ))
+                )
+              );
+            })
+          ),
+          h('h3',{style:{margin:'0 0 8px'}},"📋 Full Payment Log"),
+          h('div',{className:'admin-table'},
+            h('div',{className:'admin-head'},
+              h('span',{style:{flex:1.5}},"Date"),h('span',{style:{flex:2}},"Player"),
+              h('span',{style:{flex:1}},"Week"),h('span',{style:{flex:1.5}},"Method"),
+              h('span',{style:{flex:1}},"Amt"),h('span',{style:{flex:2}},"Note")
+            ),
+            payLog.length===0&&h('div',{style:{padding:'14px 16px',color:'#94a3b8',fontSize:13}},"No payments yet."),
+            [...payLog].reverse().map((l,i)=>h('div',{key:i,className:'admin-row'+(i%2?" alt-row":"")},
+              h('span',{style:{flex:1.5,fontSize:12,color:'#64748b'}},l.date),
+              h('span',{style:{flex:2,fontWeight:700}},l.player),
+              h('span',{style:{flex:1,fontSize:12,color:'#475569'}},"Wk "+l.week),
+              h('span',{style:{flex:1.5,fontSize:12,color:l.method==="cashapp"?"#16a34a":l.method==="zelle"?"#7c3aed":"#d97706"}},l.method==="cashapp"?"💵 CashApp":l.method==="zelle"?"📱 Zelle":"💴 Cash"),
+              h('span',{style:{flex:1,fontWeight:800,color:'#1d4ed8'}},"$"+l.amount),
+              h('span',{style:{flex:2,fontSize:12,color:'#94a3b8'}},l.note||"—")
+            )),
+            h('div',{className:'admin-row',style:{borderTop:'2px solid #e2e8f0',fontWeight:700}},
+              h('span',{style:{flex:1.5,color:'#1e293b'}},"TOTAL"),
+              h('span',{style:{flex:2}}),h('span',{style:{flex:1}}),h('span',{style:{flex:1.5}}),
+              h('span',{style:{flex:1,color:'#16a34a',fontSize:16}},"$"+payLog.reduce((s,l)=>s+l.amount,0)),
+              h('span',{style:{flex:2}})
+            )
+          ),
+          h('div',{className:'sum-grid',style:{marginTop:12}},
+            [{label:"Total Collected",val:"$"+payLog.reduce((s,l)=>s+l.amount,0),c:"#16a34a"},
+             {label:"Wk Pot Collected",val:"$"+payLog.reduce((s,l)=>s+Math.round(l.amount*(BASE_WEEKLY_FEE/ENTRY_FEE)),0),c:"#1d4ed8"},
+             {label:"King Fund Collected",val:"$"+payLog.reduce((s,l)=>s+Math.round(l.amount*(SEASON_KING_FEE/ENTRY_FEE)),0),c:"#15803d"},
+             {label:"Payments",val:payLog.length,c:"#475569"},
+            ].map((s,i)=>h('div',{key:i,className:'sum-card'},h('div',{className:'sum-val',style:{color:s.c}},s.val),h('div',{className:'sum-lbl'},s.label)))
+          )
+        ),
+
+        adminTab==="results"&&h('div',null,
+          h('div',{style:{display:'flex',alignItems:'center',gap:8,marginBottom:10,flexWrap:'wrap'}},
+            h('span',{style:{fontSize:12,color:'#64748b',fontWeight:700}},"Week:"),
+            Object.keys(NFL_WEEKS).map(w=>h('button',{key:w,className:'week-tab'+(adminWeek===Number(w)?" active":""),onClick:()=>setAdminWeek(Number(w))},"Wk "+w))
+          ),
+          h('p',{style:{fontSize:13,color:'#475569',marginBottom:12}},"Enter final scores — standings and payouts update automatically."),
+          h('div',{className:'result-grid'},
+            (NFL_WEEKS[adminWeek]||[]).map(game=>{
+              const res=results[adminWeek]?.scores?.[game.id]||{};
+              const aw=res.awayScore>res.homeScore,hw=res.homeScore>res.awayScore;
+              return h('div',{key:game.id,className:'result-card'},
+                h('div',{className:'result-matchup'},game.away+" @ "+game.home),
+                h('div',{className:'result-inputs'},
+                  h('div',{className:'result-score'},
+                    h('div',{className:'result-score-label',style:{color:aw?"#16a34a":"#1e293b"}},game.awayAbbr+(aw?" ✓":"")),
+                    h('input',{className:'result-input',type:'number',min:0,max:99,placeholder:'0',value:res.awayScore??'',onChange:e=>updateResult(adminWeek,game.id,'awayScore',e.target.value)})
+                  ),
+                  h('div',{style:{fontSize:18,color:'#cbd5e1',fontWeight:700,alignSelf:'flex-end',paddingBottom:4}},"–"),
+                  h('div',{className:'result-score'},
+                    h('div',{className:'result-score-label',style:{color:hw?"#16a34a":"#1e293b"}},game.homeAbbr+(hw?" ✓":"")),
+                    h('input',{className:'result-input',type:'number',min:0,max:99,placeholder:'0',value:res.homeScore??'',onChange:e=>updateResult(adminWeek,game.id,'homeScore',e.target.value)})
+                  )
+                ),
+                res.awayScore!==undefined&&res.homeScore!==undefined&&h('div',{style:{fontSize:11,color:'#475569',textAlign:'center',marginTop:6}},
+                  "Winner: ",h('strong',{style:{color:'#16a34a'}},aw?game.away:hw?game.home:"Tie")," · Combined: ",h('strong',null,(res.awayScore||0)+(res.homeScore||0)+" pts")
+                )
+              );
+            })
+          ),
+          h('div',{className:'announce-box'},
+            h('h3',{style:{marginBottom:8}},"📣 Announce Week "+adminWeek+" Results"),
+            h('a',{href:"sms:?&body="+encodeURIComponent("🏈 MxPlk Gridiron Picks — Week "+adminWeek+" Results!\n\n🏅 Winner: "+(wkWinners.map(w=>w.name).join(" & ")||"TBD")+(winShare?" — $"+winShare+" payout!":"")+"\n\nCheck standings: https://mxplk-gridiron.netlify.app\n\nWeek "+(Number(adminWeek)+1)+" picks open now! 🏈"),className:'reminder-btn',style:{display:'inline-flex',textDecoration:'none'}},"📣 Send Results to Group Chat")
+          )
+        ),
+
+        adminTab==="players"&&h('div',null,
+          h('h3',{style:{marginBottom:10}},"👥 Registered Players ("+players.length+")"),
+          h('div',{className:'players-table'},
+            h('div',{className:'admin-head'},
+              h('span',{style:{flex:2}},"Name"),h('span',{style:{flex:2.5}},"Email"),
+              h('span',{style:{flex:1.5}},"Phone"),h('span',{style:{flex:1}},"Joined")
+            ),
+            players.map((p,i)=>h('div',{key:p.id,className:'admin-row'+(i%2?" alt-row":"")},
+              h('span',{style:{flex:2,fontWeight:700}},p.name),
+              h('span',{style:{flex:2.5,fontSize:13,color:'#475569'}},p.email||"—"),
+              h('span',{style:{flex:1.5,fontSize:13,color:'#475569'}},p.phone||"—"),
+              h('span',{style:{flex:1,fontSize:12,color:'#94a3b8'}},p.joined)
+            ))
+          ),
+          h('div',{className:'announce-box'},
+            h('h3',{style:{marginBottom:8}},"📱 Text Players"),
+            h('div',{style:{display:'flex',flexWrap:'wrap',gap:8}},
+              players.filter(p=>p.phone).map((p,i)=>h('a',{key:i,href:"sms:"+p.phone,className:'reminder-btn',style:{fontSize:12,padding:'7px 12px',textDecoration:'none'}},"📱 "+p.name))
+            )
+          )
+        )
+      );
+
+  const StatsView=()=>h('div',null,
+    h('h2',{style:{marginBottom:4}},"📈 Season Stats"),
+    h('p',{style:{marginBottom:14}},"Click any card to see week-by-week chart"),
+    h('div',{className:'stats-grid'},
+      SEASON_STATS.filter(p=>p.paid).map((p,i)=>{
+        const tot=p.weeks.reduce((a,x)=>a+x,0),avg=(tot/p.weeks.length).toFixed(1);
+        const best=Math.max(...p.weeks),worst=Math.min(...p.weeks),badges=getBadges(p.weeks);
+        const active=statsPlayer===p.name;
+        return h('div',{key:i,className:'stats-card'+(active?" active":""),onClick:()=>setStatsPlayer(active?null:p.name)},
+          h('div',{className:'stats-top'},
+            h('div',{className:'stats-name'},p.name),
+            h('div',{className:'badge-row'},badges.map((b,j)=>h('span',{key:j,title:b.label,style:{fontSize:16}},b.icon)))
+          ),
+          h('div',{className:'stats-row2'},
+            [{v:tot,l:"Total"},{v:avg,l:"Avg/Wk"},{v:best,l:"Best",c:"#16a34a"},{v:worst,l:"Worst",c:"#dc2626"}].map((s,j)=>h('div',{key:j,className:'s-item'},h('div',{className:'s-val',style:{color:s.c||"#1d4ed8"}},s.v),h('div',{className:'s-lbl'},s.l)))
+          ),
+          active&&h('div',{style:{marginTop:10}},
+            h('div',{className:'week-chart'},
+              p.weeks.map((pts,wi)=>h('div',{key:wi,className:'wbar'},
+                h('div',{className:'wbar-fill',style:{height:(pts/14*100)+"%",background:pts>=10?"#16a34a":pts>=8?"#1d4ed8":pts>=6?"#d97706":"#dc2626"}}),
+                h('div',{className:'wbar-lbl'},"W"+(wi+1)),
+                h('div',{className:'wbar-val'},pts)
+              ))
+            ),
+            h('div',{style:{display:'flex',gap:6,flexWrap:'wrap'}},
+              badges.map((b,j)=>h('span',{key:j,style:{fontSize:12,background:'#f8fafc',border:'1px solid #e2e8f0',borderRadius:6,padding:'3px 8px',color:'#475569'}},b.icon+" "+b.label))
+            )
+          )
+        );
+      })
+    ),
+    h('div',{className:'badge-legend'},
+      h('h3',{style:{marginBottom:8}},"🏅 Badge Guide"),
+      h('div',{className:'bl-grid'},
+        [{icon:"👑",label:"Season Leader",desc:"Most total points"},{icon:"🎯",label:"Perfect Week",desc:"Best single week"},{icon:"🔥",label:"Hot Streak",desc:"3+ improving weeks"},{icon:"⭐",label:"Sharp",desc:"9.0+ avg per week"}].map((b,i)=>
+          h('div',{key:i,className:'bl-item'},h('span',{style:{fontSize:20}},b.icon),h('div',null,h('div',{style:{fontWeight:800,fontSize:13}},b.label),h('div',{style:{fontSize:11,color:'#94a3b8'}},b.desc)))
+        )
+      )
+    )
+  );
+
+  const RegisterView=()=>!regDone
+    ? h('div',null,
+        h('h2',{style:{marginBottom:4}},"✏️ Player Registration"),
+        h('p',{style:{marginBottom:16}},"Sign up for the pool — your info is only visible to the commissioner"),
+        h('div',{className:'reg-form'},
+          h('h3',{style:{marginBottom:16}},"Join MxPlk Gridiron Picks 🏈"),
+          h('div',{style:{display:'flex',flexDirection:'column',gap:12,marginBottom:14}},
+            h('div',null,h('div',{style:{fontSize:12,fontWeight:700,color:'#475569',marginBottom:4}},"Full Name *"),h('input',{placeholder:'Your name',value:regName,onChange:e=>setRegName(e.target.value),style:{width:'100%'}})),
+            h('div',null,h('div',{style:{fontSize:12,fontWeight:700,color:'#475569',marginBottom:4}},"Email Address"),h('input',{type:'email',placeholder:'you@email.com',value:regEmail,onChange:e=>setRegEmail(e.target.value),style:{width:'100%'}})),
+            h('div',null,h('div',{style:{fontSize:12,fontWeight:700,color:'#475569',marginBottom:4}},"Phone Number"),h('input',{type:'tel',placeholder:'555-123-4567',value:regPhone,onChange:e=>setRegPhone(e.target.value),style:{width:'100%'}}))
+          ),
+          h('div',{style:{background:'#eff6ff',border:'1px solid #bfdbfe',borderRadius:8,padding:'10px 14px',fontSize:12,color:'#1d4ed8',marginBottom:14,lineHeight:1.5}},"📱 Your phone lets the commissioner send you reminders and results."),
+          h('button',{className:'btn btn-primary',onClick:addPlayer},"Register for the Pool →")
+        )
+      )
+    : h('div',{className:'reg-success'},
+        h('div',{style:{fontSize:44,marginBottom:10}},"🏈"),
+        h('h2',{style:{marginBottom:8}},"You're registered, "+regName+"!"),
+        h('p',{style:{maxWidth:380,margin:'0 auto 20px'}},"Head to Weekly Picks to make your first picks and pay your entry fee!"),
+        h('div',{className:'hero-actions'},
+          h('button',{className:'btn btn-primary',onClick:()=>{setView("picks");setRegDone(false);}},"Make My Picks →"),
+          h('button',{className:'btn btn-outline',onClick:()=>{setRegDone(false);setRegName("");setRegEmail("");setRegPhone("");}},"Register Another Player")
+        )
+      );
+
+  const RulesView=()=>h('div',null,
+    h('h2',{style:{marginBottom:14}},"📜 Pool Rules"),
+    h('div',{className:'grid2'},
+      [
+        {title:"💵 Weekly Entry",text:"$"+ENTRY_FEE+"/week ($"+BASE_WEEKLY_FEE+" pot + $"+SEASON_KING_FEE+" Season King fund) via Cash App ("+PAYMENT_INFO.cashapp+") or Zelle ("+PAYMENT_INFO.zelle+"). Must be paid before first game."},
+        {title:"⏱ Payment Deadline",text:"Payment must be confirmed by commissioner before kickoff. Unpaid entries are automatically voided and don't count toward standings."},
+        {title:"📋 Weekly Picks",text:"Pick one winner for every game. Picks lock at first kickoff. 1 point per correct pick."},
+        {title:"🏈 MNF Tiebreaker",text:"If two players tie on correct picks, whoever guessed closest to the Monday Night Football combined total WITHOUT going over wins the pot (Price is Right rules). If all go over, closest wins. If still tied, split."},
+        {title:"🏅 Weekly Winner",text:"The player with the most correct picks wins 100% of that week's pot. Tiebreaker: MNF score guess without going over. Still tied? Split."},
+        {title:"👑 Season King",text:"$"+SEASON_KING_FEE+"/entry/week goes to a separate fund. Most total correct picks across all 18 regular season weeks wins the entire fund after Week 18. Ties split equally."},
+        {title:"👀 All Picks Reveal",text:"Once the weekly deadline passes, all picks are revealed in the All Picks tab so everyone can see who picked what."},
+        {title:"🏆 Playoff Bracket",text:"$"+PLAYOFF_FEE+" entry. Pick every playoff game before Wild Card. 1pt Wild Card, 2pt Divisional, 3pt Conf. Champ, 5pt Super Bowl."},
+        {title:"🎯 Playoff Tiebreakers",text:"1st: who picked the Super Bowl winner. 2nd: closest combined Super Bowl total WITHOUT going over. Still tied? Prize splits equally."},
+        {title:"💰 Payouts",text:"Weekly: winner takes 100% of pot. Season King: winner takes full fund after Wk 18. Playoff: winner takes full playoff pool. Commissioner pays out manually via Cash App/Zelle."},
+        {title:"⚖️ Disputes",text:"Commissioner's decision is final. Picks are timestamped. Payment screenshots accepted as proof. Keep it fun!"},
+      ].map((r,i)=>h('div',{key:i,className:'rule-card'},h('div',{className:'rule-title'},r.title),h('div',{className:'rule-content'},r.text)))
+    )
+  );
+
+  return h('div',null,
+    h(Nav),
+    h(PayModal),
+    toast&&h('div',{className:'toast',style:{background:toast.type==="error"?"#dc2626":"#16a34a"}},(toast.type==="error"?"⚠️ ":"✅ ")+toast.msg),
+    h('main',null,
+      view==="home"&&h(HomeView),
+      view==="picks"&&h(PicksView),
+      view==="allpicks"&&h(AllPicksView),
+      view==="playoffs"&&h(PlayoffsView),
+      view==="leaderboard"&&h(LeaderView),
+      view==="payouts"&&h(PayoutsView),
+      view==="stats"&&h(StatsView),
+      view==="register"&&h(RegisterView),
+      view==="rules"&&h(RulesView),
+      view==="admin"&&h(AdminView),
+    ),
+    h('footer',{className:'footer'},
+      h('span',null,"🏈 MxPlk Gridiron Picks · 2026–2027 NFL Season"),
+      h('span',{style:{opacity:.6}},"For entertainment purposes · Office use only")
+    )
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(React.createElement(App));
+</script>
+</body>
+</html>
